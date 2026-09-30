@@ -47,7 +47,7 @@
 |---|---|---|---|
 | `validate_logs.py` | 100/100 | 100/100 | 83 records, 0 thiếu field, 0 thiếu enrichment, 38 correlation IDs, 0 PII leak |
 | `validate_dashboard.py` | 6/6 panel | 6/6 panel | Dashboard contract hợp lệ |
-| `pytest` | 24 passed | 25 passed trong 1.79s | Có regression test cho PII trong generation trace |
+| `pytest` | 24 passed | 26 passed trong 1.98s | Có regression test cho PII trong generation trace |
 | Số traces hợp lệ | Tối thiểu 10 | Tối thiểu 32 traces hiển thị trong Langfuse | Traces thuộc project cá nhân |
 | Số PII leak | 0 | 0 | Validator không phát hiện PII thô |
 | Latency P95 / TTFT | Baseline P95 khoảng 489ms, TTFT khoảng 50ms | Incident P95 khoảng 3.5s, request đại diện 3696ms và TTFT 50ms | P95 vượt challenge threshold 2000ms |
