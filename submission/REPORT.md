@@ -7,7 +7,7 @@
 - **Họ và tên:** TRẦN THANH THÁI
 - **MSSV:** 2A202602454
 - **Lớp:** K4-L3B
-- **Repository URL:** https://github.com/tranthai239/K4-L3B-Day13-Monitoring-LLMOps
+- **Repository URL:** https://github.com/tranthai239/K4-L3-DAY13-TranThanhThai-2A202602454-Monitoring-LLMOps
 - **Commit SHA cuối:** Chưa điền — cập nhật sau commit cuối và push remote
 - **Challenge ID:** `day13-k4-l3b-monitoring-llmops-v1`
 - **Tên project Langfuse cá nhân:** `day13-k4-l3b-2A202602454`
@@ -35,7 +35,7 @@
 | 07 - Trace waterfall | [evidence/07-trace-waterfall.png](evidence/07-trace-waterfall.png) | Root `lab-agent-run` có child retrieval và generation |
 | 08 - Trace metadata | [evidence/08-trace-metadata.png](evidence/08-trace-metadata.png) | Correlation ID, prompt metadata, token và cost |
 | 09 - Prompt versions | [evidence/09-prompt-versions.png](evidence/09-prompt-versions.png) | Prompt v1/v2 và labels |
-| 10 - Prompt rollback | [evidence/10-prompt-rollback.png](evidence/10-prompt-rollback.png) | Trạng thái labels sau rollback |
+| 10a/10b - Prompt promote và rollback | [evidence/10a-prompt-promote.png](evidence/10a-prompt-promote.png), [evidence/10b-prompt-rollback.png](evidence/10b-prompt-rollback.png) | `production` được promote sang v2 rồi rollback về v1 |
 | 11a–11e - Dashboard overview | [evidence/11a-dashboard-traces-cost.png](evidence/11a-dashboard-traces-cost.png), [11b](evidence/11b-dashboard-traces-cost.png), [11c](evidence/11c-dashboard-traces-cost.png), [11d](evidence/11d-dashboard-traces-cost.png), [11e](evidence/11e-dashboard-traces-cost.png) | Dashboard runtime: traffic, cost, tokens và latency |
 | 12 - Incident metric | [evidence/12-incident-metric.png](evidence/12-incident-metric.png) | Latency P95 tăng bất thường |
 | 13 - Incident log | [evidence/13-incident-log.png](evidence/13-incident-log.png) | Request chậm và `correlation_id=req-8343780c` |
@@ -111,7 +111,7 @@ P95 ≈ 3.5s > 2s
 - **Luồng Metrics → Logs → Traces:** Metrics phát hiện thời điểm P95 tăng; log tại cùng thời điểm cung cấp request đại diện và `correlation_id`; trace dùng cùng ID phân rã thời gian theo root/retrieval/generation để xác định bottleneck.
 - **Vai trò vận hành LLM:** Prompt version và labels hỗ trợ thử candidate, promote và rollback không sửa code. Token/cost giúp phát hiện model usage bất thường. SLO/error budget định nghĩa mức chấp nhận được; alert và runbook chuyển tín hiệu thành hành động điều tra.
 - **Điều quan trọng nhất đã học:** Một metric chỉ báo có sự cố; correlation ID và distributed trace mới cho biết request nào bị ảnh hưởng và span nào là nguyên nhân.
-- **Hạn chế còn lại:** Evidence 08 hiện gộp metadata root trong một ảnh thay vì tách 08a/08b; evidence 10 chỉ giữ ảnh trạng thái rollback thay vì cả ảnh promote và rollback; dashboard được chia thành 11a–11e. Cần đối chiếu mức chấp nhận theo yêu cầu CP4 cuối cùng. Commit SHA chỉ điền sau commit cuối đã push.
+- **Hạn chế còn lại:** Dashboard đang được chia thành 11a–11e và chưa thể hiện rõ đầy đủ sáu panel cùng threshold/SLO. Commit SHA chỉ điền sau commit cuối đã push.
 
 ## 9. Checklist trước khi nộp
 
