@@ -4,8 +4,8 @@
 
 ## 1. Thông tin học viên
 
-- **Họ và tên:**
-- **MSSV:**
+- **Họ và tên:**TRẦN THANH THÁI
+- **MSSV:**2A202602454
 - **Lớp:** K4-L3B
 - **Repository URL:**
 - **Commit SHA cuối:**
@@ -37,38 +37,38 @@
 
 | Nội dung | Baseline | Kết quả cuối | Nhận xét |
 |---|---|---|---|
-| `validate_logs.py` | | | |
-| `validate_dashboard.py` | | | |
-| `pytest` | | | |
-| Số traces hợp lệ | | | |
-| Số PII leak | | | |
-| Latency P95 / TTFT P95 | | | |
-| Retrieval success rate | | | |
+| `validate_logs.py` | 100/100 | | 4 mục PASSED (schema, correlation ID, enrichment, PII) |
+| `validate_dashboard.py` | 6/6 panel | | HỢP LỆ: 6/6 panel có trong dashboard contract |
+| `pytest` | 24 passed | | 24 passed in 1.55s |
+| Số traces hợp lệ | 10 | | Langfuse kết nối thành công, traces đã gửi |
+| Số PII leak | 0 | | Không phát hiện PII rò rỉ |
+| Latency P95 / TTFT P95 | ~489ms / ~50ms | | Dựa trên load_test 10 requests |
+| Retrieval success rate | 100% | | Tất cả 10 requests đều tool_success: true |
 
 ## 4. Logging và PII
 
-- **Cách tạo/nhận và truyền correlation ID:**
-- **Các metadata được ghi vào structured log:**
-- **Cách bảo đảm PII được scrub trước khi ghi:**
-- **Cách kiểm chứng kết quả:**
+- **Cách tạo/nhận và truyền correlation ID:** Middleware nhận header `x-request-id` hoặc tự sinh `req-<8-hex>`. ID được bind vào structlog contextvars và trả về qua response header.
+- **Các metadata được ghi vào structured log:** `correlation_id`, `user_id_hash`, `session_id`, `feature`, `model`, `env`, `latency_ms`, `ttft_ms`, `tokens_in`, `tokens_out`, `cost_usd`, `quality_score`, `tool_name`, `tool_success`.
+- **Cách bảo đảm PII được scrub trước khi ghi:** Processor `scrub_event` đăng ký trước `JsonlFileProcessor` trong chuỗi structlog. Dùng regex che email, SĐT VN, CCCD, thẻ tín dụng.
+- **Cách kiểm chứng kết quả:** `validate_logs.py` đạt 100/100. Pytest 24 passed.
 
 ## 5. Tracing và prompt versioning
 
-- **Cách xác nhận traces do chính tôi tạo trong project cá nhân:**
-- **Cấu trúc root/retrieval/generation observations:**
-- **Cách nối trace với log:**
-- **Prompt name:**
-- **Version/label baseline:**
-- **Version/label candidate:**
-- **Trace ID của mỗi version:**
-- **Cách promote và rollback `production`:**
+- **Cách xác nhận traces do chính tôi tạo trong project cá nhân:** Vào Langfuse → project `day13-k4-l3b-2A202602454` → tab Traces.
+- **Cấu trúc root/retrieval/generation observations:** Root `lab-agent-run` (agent) → child `retrieval` (span) → child `generation` (generation, có model, tokens, cost).
+- **Cách nối trace với log:** Cả trace metadata và log đều chứa cùng `correlation_id`.
+- **Prompt name:** `day13-chat`
+- **Version/label baseline:** Version 1, labels: `baseline` + `production`
+- **Version/label candidate:** Version 2, label: `candidate`
+- **Trace ID của mỗi version:** (Điền sau khi chạy workload)
+- **Cách promote và rollback `production`:** Trên Langfuse UI, chọn version mới → gắn label `production`. Rollback: chọn version cũ → gắn lại label `production`.
 
 ## 6. Dashboard, SLO và alerts
 
-- **Dashboard và sáu panel:**
-- **SLO và lý do chọn:**
-- **Cách tính error budget:**
-- **Ba alert và runbook tương ứng:**
+- **Dashboard và sáu panel:** Latency (P50/P95/P99 + TTFT), Traffic (request count), Errors (error rate + retrieval success), Cost (sum/minute), Tokens (in/out), Quality (mean score).
+- **SLO và lý do chọn:** 99.5% request thành công với latency ≤ 3000ms trong 28 ngày. Ngưỡng gấp ~6 lần baseline P95.
+- **Cách tính error budget:** 100% - 99.5% = 0.5%. Với 10,000 request → tối đa 50 request lỗi/chậm.
+- **Ba alert và runbook tương ứng:** (1) `high_latency_p95` warning 5m, (2) `high_error_rate` critical 3m, (3) `low_retrieval_success` warning 5m. Chi tiết tại `docs/alerts.md`.
 
 > Ví dụ cách viết error budget: "SLO 99.5% trong 28 ngày nghĩa là error budget 0.5%. Nếu workload có 10,000 request thì tối đa 50 request được phép lỗi hoặc chậm hơn ngưỡng SLO."
 
