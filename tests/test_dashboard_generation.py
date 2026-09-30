@@ -24,7 +24,7 @@ def test_generated_dashboard_contains_six_panels_and_scrubs_log_content(tmp_path
     )
 
     result = subprocess.run(
-        [sys.executable, str(SCRIPT), "--logs", str(logs), "--output", str(output), "--mode", "full"],
+        [sys.executable, str(SCRIPT), "--logs", str(logs), "--output", str(output)],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -38,7 +38,7 @@ def test_generated_dashboard_contains_six_panels_and_scrubs_log_content(tmp_path
         "Latency percentiles and TTFT", "Request traffic", "Error rate and retrieval success",
         "Cost over time", "Input and output tokens", "Quality proxy", "3000 ms",
         "requests/min", "retrieval success", "50,000", "0.75", "Input / Output tokens",
-        "3696 ms", "Baseline + incident",
+        "3696 ms", "Last 1 day",
     ):
         if expected == "Input / Output tokens":
             assert "input / output tokens" in page

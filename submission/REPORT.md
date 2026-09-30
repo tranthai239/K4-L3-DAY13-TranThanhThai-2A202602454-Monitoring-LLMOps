@@ -8,7 +8,7 @@
 - **MSSV:** 2A202602454
 - **Lớp:** K4-L3B
 - **Repository URL:** https://github.com/tranthai239/K4-L3-DAY13-TranThanhThai-2A202602454-Monitoring-LLMOps
-- **Commit SHA cuối:** Chưa điền — cập nhật sau commit cuối và push remote
+- **Commit SHA code/evidence:** `4ae7329` (đã push); commit cuối cùng được ghi riêng sau lần cập nhật report cuối.
 - **Challenge ID:** `day13-k4-l3b-monitoring-llmops-v1`
 - **Tên project Langfuse cá nhân:** `day13-k4-l3b-2A202602454`
 
@@ -33,10 +33,10 @@
 | 05 - PII redaction | [evidence/05-pii-redaction.png](evidence/05-pii-redaction.png) | PII test được thay bằng marker redaction |
 | 06 - Trace list | [evidence/06-trace-list.png](evidence/06-trace-list.png) | Project Langfuse cá nhân có ít nhất 10 traces |
 | 07 - Trace waterfall | [evidence/07-trace-waterfall.png](evidence/07-trace-waterfall.png) | Root `lab-agent-run` có child retrieval và generation |
-| 08 - Trace metadata | [evidence/08-trace-metadata.png](evidence/08-trace-metadata.png) | Correlation ID, prompt metadata, token và cost |
+| 08a/08b - Trace metadata | [evidence/08a-trace-metadata.png](evidence/08a-trace-metadata.png), [evidence/08b-generation-metadata.png](evidence/08b-generation-metadata.png) | Root metadata và generation metadata |
 | 09 - Prompt versions | [evidence/09-prompt-versions.png](evidence/09-prompt-versions.png) | Prompt v1/v2 và labels |
 | 10a/10b - Prompt promote và rollback | [evidence/10a-prompt-promote.png](evidence/10a-prompt-promote.png), [evidence/10b-prompt-rollback.png](evidence/10b-prompt-rollback.png) | `production` được promote sang v2 rồi rollback về v1 |
-| 11a–11e - Dashboard overview | [evidence/11a-dashboard-traces-cost.png](evidence/11a-dashboard-traces-cost.png), [11b](evidence/11b-dashboard-traces-cost.png), [11c](evidence/11c-dashboard-traces-cost.png), [11d](evidence/11d-dashboard-traces-cost.png), [11e](evidence/11e-dashboard-traces-cost.png) | Dashboard runtime: traffic, cost, tokens và latency |
+| 11 - Dashboard overview | [evidence/11-dashboard-overview.png](evidence/11-dashboard-overview.png) | Sáu panel, units, thresholds, TTFT, retrieval success và time range 1 ngày |
 | 12 - Incident metric | [evidence/12-incident-metric.png](evidence/12-incident-metric.png) | Latency P95 tăng bất thường |
 | 13 - Incident log | [evidence/13-incident-log.png](evidence/13-incident-log.png) | Request chậm và `correlation_id=req-8343780c` |
 | 14 - Incident trace | [evidence/14-incident-trace.png](evidence/14-incident-trace.png) | Cùng correlation ID và retrieval span 2.50s |
