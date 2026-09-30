@@ -51,30 +51,86 @@ class LabAgent:
             },
         ):
             started = time.perf_counter()
-            docs = retrieve(message)
+            enabled = tracing_enabled()
+
+            # CP2: Child observation for retrieval (Langfuse SDK v4)
+            if enabled and hasattr(langfuse_client, "start_as_current_observation"):
+                try:
+                    with langfuse_client.start_as_current_observation(
+                        name="retrieval",
+                        as_type="span",
+                    ):
+                        docs = retrieve(message)
+                        if hasattr(langfuse_client, "update_current_span"):
+                            langfuse_client.update_current_span(
+                                metadata={
+                                    "doc_count": len(docs),
+                                    "query_preview": summarize_text(message),
+                                }
+                            )
+                except Exception:
+                    docs = retrieve(message)
+            else:
+                docs = retrieve(message)
+
             prompt = resolve_prompt(
                 langfuse_client,
                 feature=feature,
                 docs=docs,
                 message=message,
-                enabled=tracing_enabled(),
+                enabled=enabled,
             )
-            langfuse_client.update_current_span(
-                metadata={
-                    "doc_count": len(docs),
-                    "query_preview": summarize_text(message),
-                    "prompt_name": prompt.name,
-                    "prompt_label": prompt.label,
-                    "prompt_version": prompt.version,
-                    "prompt_source": prompt.source,
-                    "prompt_fetch_error": prompt.fetch_error or "",
-                },
-                version=prompt.version,
-            )
-            # TODO (CP2): instrument retrieve() and FakeLLM.generate() as child
-            # observations. The nested generation must receive prompt, usage and cost.
+            if hasattr(langfuse_client, "update_current_span"):
+                try:
+                    langfuse_client.update_current_span(
+                        metadata={
+                            "doc_count": len(docs),
+                            "query_preview": summarize_text(message),
+                            "prompt_name": prompt.name,
+                            "prompt_label": prompt.label,
+                            "prompt_version": prompt.version,
+                            "prompt_source": prompt.source,
+                            "prompt_fetch_error": prompt.fetch_error or "",
+                        },
+                        version=prompt.version,
+                    )
+                except Exception:
+                    pass
+
+            # CP2: Child observation for LLM generation (Langfuse SDK v4)
             with propagate_attributes(prompt=prompt.managed_prompt):
-                response = self.llm.generate(prompt.text)
+                if enabled and hasattr(langfuse_client, "start_as_current_observation"):
+                    try:
+                        with langfuse_client.start_as_current_observation(
+                            name="generation",
+                            as_type="generation",
+                        ):
+                            response = self.llm.generate(prompt.text)
+                            cost_usd = self._estimate_cost(
+                                response.usage.input_tokens, response.usage.output_tokens
+                            )
+                            if hasattr(langfuse_client, "update_current_generation"):
+                                langfuse_client.update_current_generation(
+                                    model=self.model,
+                                    input=summarize_text(prompt.text),
+                                    output=summarize_text(response.text),
+                                    usage_details={
+                                        "input": response.usage.input_tokens,
+                                        "output": response.usage.output_tokens,
+                                        "total": response.usage.input_tokens + response.usage.output_tokens,
+                                    },
+                                    cost_details={"total": cost_usd},
+                                    metadata={
+                                        "cost_usd": cost_usd,
+                                        "prompt_name": prompt.name,
+                                        "prompt_version": prompt.version,
+                                        "prompt_label": prompt.label,
+                                    },
+                                )
+                    except Exception:
+                        response = self.llm.generate(prompt.text)
+                else:
+                    response = self.llm.generate(prompt.text)
             quality_score = self._heuristic_quality(message, response.text, docs)
             latency_ms = int((time.perf_counter() - started) * 1000)
             cost_usd = self._estimate_cost(response.usage.input_tokens, response.usage.output_tokens)

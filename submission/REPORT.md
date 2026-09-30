@@ -1,101 +1,127 @@
 # Báo cáo cá nhân — K4-L3B Day 13 Monitoring & LLMOps
 
-> Mỗi học viên hoàn thiện một file duy nhất này. Chỉ cần 3 output text và 5 ảnh runtime; dùng đường dẫn tương đối, ví dụ `evidence/03-incident-trace.png`.
+> Báo cáo dùng 3 output text và bộ evidence runtime 01–14 theo yêu cầu CP4. Mọi đường dẫn đều tương đối từ thư mục `submission/`.
 
 ## 1. Thông tin học viên
 
-- **Họ và tên:**TRẦN THANH THÁI
-- **MSSV:**2A202602454
+- **Họ và tên:** TRẦN THANH THÁI
+- **MSSV:** 2A202602454
 - **Lớp:** K4-L3B
-- **Repository URL:**
-- **Commit SHA cuối:**
-- **Challenge ID:**
-- **Tên project Langfuse cá nhân:** `day13-k4-l3b-<MSSV>`
+- **Repository URL:** https://github.com/tranthai239/K4-L3B-Day13-Monitoring-LLMOps
+- **Commit SHA cuối:** Chưa điền — cập nhật sau commit cuối và push remote
+- **Challenge ID:** `day13-k4-l3b-monitoring-llmops-v1`
+- **Tên project Langfuse cá nhân:** `day13-k4-l3b-2A202602454`
 
 ## 2. Evidence index
 
-Giữ đúng ba output text và năm ảnh dưới đây. Không tách thêm ảnh; nếu cần giải thích, ghi bằng chữ trong các mục sau.
+### 2.1. Ba output text
 
 | Evidence | Đường dẫn |
 |---|---|
-| Pytest cuối | `evidence/pytest.txt` |
-| Log validator | `evidence/log-validator.txt` |
-| Dashboard validator | `evidence/dashboard-validator.txt` |
-| Structured log + incident log | `evidence/01-incident-log.png` |
-| Trace list | `evidence/02-trace-list.png` |
-| Trace waterfall + metadata + incident trace | `evidence/03-incident-trace.png` |
-| Prompt versions + promote/rollback | `evidence/04-prompt-versioning.png` |
-| Dashboard + incident metric | `evidence/05-dashboard-incident.png` |
+| Pytest output | [evidence/pytest.txt](evidence/pytest.txt) |
+| Log validator output | [evidence/log-validator.txt](evidence/log-validator.txt) |
+| Dashboard validator output | [evidence/dashboard-validator.txt](evidence/dashboard-validator.txt) |
+
+### 2.2. Evidence runtime 01–14
+
+| Evidence | Đường dẫn | Nội dung chứng minh |
+|---|---|---|
+| 01 - Pytest | [evidence/01-pytest.png](evidence/01-pytest.png) | Lệnh test và số test pass |
+| 02 - Log validator | [evidence/02-log-validator.png](evidence/02-log-validator.png) | Grading Scorecard và điểm validator |
+| 03 - Dashboard validator | [evidence/03-dashboard-validator.png](evidence/03-dashboard-validator.png) | Dashboard contract đạt 6/6 panel |
+| 04 - Structured log | [evidence/04-structured-log.png](evidence/04-structured-log.png) | Hai event structured log cùng `correlation_id` |
+| 05 - PII redaction | [evidence/05-pii-redaction.png](evidence/05-pii-redaction.png) | PII test được thay bằng marker redaction |
+| 06 - Trace list | [evidence/06-trace-list.png](evidence/06-trace-list.png) | Project Langfuse cá nhân có ít nhất 10 traces |
+| 07 - Trace waterfall | [evidence/07-trace-waterfall.png](evidence/07-trace-waterfall.png) | Root `lab-agent-run` có child retrieval và generation |
+| 08 - Trace metadata | [evidence/08-trace-metadata.png](evidence/08-trace-metadata.png) | Correlation ID, prompt metadata, token và cost |
+| 09 - Prompt versions | [evidence/09-prompt-versions.png](evidence/09-prompt-versions.png) | Prompt v1/v2 và labels |
+| 10 - Prompt rollback | [evidence/10-prompt-rollback.png](evidence/10-prompt-rollback.png) | Trạng thái labels sau rollback |
+| 11a–11e - Dashboard overview | [evidence/11a-dashboard-traces-cost.png](evidence/11a-dashboard-traces-cost.png), [11b](evidence/11b-dashboard-traces-cost.png), [11c](evidence/11c-dashboard-traces-cost.png), [11d](evidence/11d-dashboard-traces-cost.png), [11e](evidence/11e-dashboard-traces-cost.png) | Dashboard runtime: traffic, cost, tokens và latency |
+| 12 - Incident metric | [evidence/12-incident-metric.png](evidence/12-incident-metric.png) | Latency P95 tăng bất thường |
+| 13 - Incident log | [evidence/13-incident-log.png](evidence/13-incident-log.png) | Request chậm và `correlation_id=req-8343780c` |
+| 14 - Incident trace | [evidence/14-incident-trace.png](evidence/14-incident-trace.png) | Cùng correlation ID và retrieval span 2.50s |
 
 ## 3. Kết quả kỹ thuật
 
-| Nội dung | Baseline | Kết quả cuối | Nhận xét |
+| Nội dung | Baseline / yêu cầu | Kết quả cuối | Nhận xét |
 |---|---|---|---|
-| `validate_logs.py` | 100/100 | | 4 mục PASSED (schema, correlation ID, enrichment, PII) |
-| `validate_dashboard.py` | 6/6 panel | | HỢP LỆ: 6/6 panel có trong dashboard contract |
-| `pytest` | 24 passed | | 24 passed in 1.55s |
-| Số traces hợp lệ | 10 | | Langfuse kết nối thành công, traces đã gửi |
-| Số PII leak | 0 | | Không phát hiện PII rò rỉ |
-| Latency P95 / TTFT P95 | ~489ms / ~50ms | | Dựa trên load_test 10 requests |
-| Retrieval success rate | 100% | | Tất cả 10 requests đều tool_success: true |
+| `validate_logs.py` | 100/100 | 100/100 | 83 records, 0 thiếu field, 0 thiếu enrichment, 38 correlation IDs, 0 PII leak |
+| `validate_dashboard.py` | 6/6 panel | 6/6 panel | Dashboard contract hợp lệ |
+| `pytest` | 24 passed | 25 passed trong 1.79s | Có regression test cho PII trong generation trace |
+| Số traces hợp lệ | Tối thiểu 10 | Tối thiểu 32 traces hiển thị trong Langfuse | Traces thuộc project cá nhân |
+| Số PII leak | 0 | 0 | Validator không phát hiện PII thô |
+| Latency P95 / TTFT | Baseline P95 khoảng 489ms, TTFT khoảng 50ms | Incident P95 khoảng 3.5s, request đại diện 3696ms và TTFT 50ms | P95 vượt challenge threshold 2000ms |
+| Retrieval success rate | 100% | 100% trong request đại diện | Sự cố làm chậm retrieval, không làm retrieval thất bại |
+
+Kết quả lệnh được lưu tại [pytest.txt](evidence/pytest.txt), [log-validator.txt](evidence/log-validator.txt) và [dashboard-validator.txt](evidence/dashboard-validator.txt).
 
 ## 4. Logging và PII
 
-- **Cách tạo/nhận và truyền correlation ID:** Middleware nhận header `x-request-id` hoặc tự sinh `req-<8-hex>`. ID được bind vào structlog contextvars và trả về qua response header.
-- **Các metadata được ghi vào structured log:** `correlation_id`, `user_id_hash`, `session_id`, `feature`, `model`, `env`, `latency_ms`, `ttft_ms`, `tokens_in`, `tokens_out`, `cost_usd`, `quality_score`, `tool_name`, `tool_success`.
-- **Cách bảo đảm PII được scrub trước khi ghi:** Processor `scrub_event` đăng ký trước `JsonlFileProcessor` trong chuỗi structlog. Dùng regex che email, SĐT VN, CCCD, thẻ tín dụng.
-- **Cách kiểm chứng kết quả:** `validate_logs.py` đạt 100/100. Pytest 24 passed.
+- **Cách tạo/nhận và truyền correlation ID:** Middleware nhận header `x-request-id` hoặc tự sinh ID dạng `req-<8-hex>`. ID được bind vào structlog contextvars, truyền vào agent/trace và trả về qua response header.
+- **Metadata trong structured log:** `correlation_id`, `user_id_hash`, `session_id`, `feature`, `model`, `env`, `latency_ms`, `ttft_ms`, `tokens_in`, `tokens_out`, `cost_usd`, `quality_score`, `tool_name`, `tool_success`.
+- **Bảo vệ PII:** Dữ liệu được scrub trước khi serialization/export. Email, SĐT Việt Nam, CCCD và thẻ tín dụng được thay bằng marker `[REDACTED_*]`; `user_id` chỉ được ghi dưới dạng hash. Input/output gửi sang generation trace cũng dùng preview đã scrub.
+- **Kiểm chứng:** Log validator đạt 100/100, không phát hiện PII leak; toàn bộ 25 tests pass.
 
 ## 5. Tracing và prompt versioning
 
-- **Cách xác nhận traces do chính tôi tạo trong project cá nhân:** Vào Langfuse → project `day13-k4-l3b-2A202602454` → tab Traces.
-- **Cấu trúc root/retrieval/generation observations:** Root `lab-agent-run` (agent) → child `retrieval` (span) → child `generation` (generation, có model, tokens, cost).
-- **Cách nối trace với log:** Cả trace metadata và log đều chứa cùng `correlation_id`.
-- **Prompt name:** `day13-chat`
-- **Version/label baseline:** Version 1, labels: `baseline` + `production`
-- **Version/label candidate:** Version 2, label: `candidate`
-- **Trace ID của mỗi version:** (Điền sau khi chạy workload)
-- **Cách promote và rollback `production`:** Trên Langfuse UI, chọn version mới → gắn label `production`. Rollback: chọn version cũ → gắn lại label `production`.
+- **Nguồn traces:** Project Langfuse cá nhân `day13-k4-l3b-2A202602454`, không dùng project chung.
+- **Cấu trúc observation:** Root `lab-agent-run` kiểu agent → child `retrieval` kiểu span → child `generation` kiểu generation.
+- **Nối trace với log:** Log và trace metadata cùng chứa `correlation_id`.
+- **Prompt name:** `day13-chat`.
+- **Baseline:** version 1, labels `baseline` và `production` sau rollback.
+- **Candidate:** version 2, label `candidate` (`latest` do Langfuse tự gắn).
+- **Trace baseline v1:** `114c494a9a2d40385aaf5eaadaf6c0e8`.
+- **Trace candidate v2:** `680844ae87109fb59e348f62fcb30cf8`.
+- **Promote và rollback:** Chuyển `production` từ v1 sang v2, chạy request xác nhận trace dùng `prompt_label=production` và `prompt_version=2`, sau đó chuyển `production` về v1. Trạng thái cuối: v1 có `baseline` + `production`; v2 có `candidate`.
 
 ## 6. Dashboard, SLO và alerts
 
-- **Dashboard và sáu panel:** Latency (P50/P95/P99 + TTFT), Traffic (request count), Errors (error rate + retrieval success), Cost (sum/minute), Tokens (in/out), Quality (mean score).
-- **SLO và lý do chọn:** 99.5% request thành công với latency ≤ 3000ms trong 28 ngày. Ngưỡng gấp ~6 lần baseline P95.
-- **Cách tính error budget:** 100% - 99.5% = 0.5%. Với 10,000 request → tối đa 50 request lỗi/chậm.
-- **Ba alert và runbook tương ứng:** (1) `high_latency_p95` warning 5m, (2) `high_error_rate` critical 3m, (3) `low_retrieval_success` warning 5m. Chi tiết tại `docs/alerts.md`.
-
-> Ví dụ cách viết error budget: "SLO 99.5% trong 28 ngày nghĩa là error budget 0.5%. Nếu workload có 10,000 request thì tối đa 50 request được phép lỗi hoặc chậm hơn ngưỡng SLO."
+- **Dashboard contract:** Latency (P50/P95/P99 và TTFT P95), Traffic (request count), Errors (error rate và retrieval success), Cost (USD/phút), Tokens (input/output), Quality (mean score). Cấu hình tại [config/dashboard.yaml](../config/dashboard.yaml).
+- **SLO:** 99.5% request thành công với latency ≤ 3000ms trong cửa sổ 28 ngày. Cấu hình tại [config/slo.yaml](../config/slo.yaml).
+- **Error budget:** `100% - 99.5% = 0.5%`. Với 10,000 requests, tối đa 50 requests được phép lỗi hoặc chậm hơn ngưỡng SLO.
+- **Alerts:** `high_latency_p95` warning trong 5 phút, `high_error_rate` critical trong 3 phút, `low_retrieval_success` warning trong 5 phút. Cấu hình tại [config/alert_rules.yaml](../config/alert_rules.yaml), runbook tại [docs/alerts.md](../docs/alerts.md).
 
 ## 7. Điều tra challenge
 
-- **Challenge ID:**
-- **Khoảng thời gian điều tra:**
-- **Triệu chứng từ metrics:**
-- **Log line và correlation ID liên quan:**
-- **Trace ID và span gây ảnh hưởng:**
-- **Root cause:**
-- **Fix action:**
-- **Preventive measure:**
+- **Challenge ID:** `day13-k4-l3b-monitoring-llmops-v1`.
+- **Incident:** `rag_slow`.
+- **Khoảng thời gian đại diện:** 2026-09-30 21:24:44 ICT (2026-09-30 14:24:44Z).
+- **Triệu chứng từ metrics:** Latency P95 tăng lên khoảng 3.5s, vượt challenge threshold 2s. Root trace đại diện mất 3.70s.
+- **Log và correlation ID:** Event `response_sent`, `correlation_id=req-8343780c`, `latency_ms=3696`, `ttft_ms=50`, `tool_name=retrieval`, `tool_success=true`, `cost_usd=0.002295`.
+- **Trace và span gây ảnh hưởng:** Trace ID `beb9b781881a9943cb33ebb10abfa5de`; root `lab-agent-run` 3.70s; `retrieval` 2.50s; `generation` 0.16s.
+- **Root cause:** Incident `rag_slow` thêm độ trễ 2.5 giây vào retrieval. Generation vẫn khoảng 0.16 giây, nên retrieval là bottleneck.
+- **Fix action:** Tắt incident bằng `python scripts/inject_incident.py --disable` và xác nhận `rag_slow`, `tool_fail`, `cost_spike` đều `False`.
+- **Preventive measure:** Alert `high_latency_p95` khi P95 > 3000ms trong 5 phút; runbook yêu cầu lọc log theo `correlation_id`, mở trace tương ứng và kiểm tra retrieval trước.
 
-> Gợi ý cách viết ngắn, không thay cho evidence thực tế: "Metric cho thấy `[latency/error/cost/quality]` bất thường trong `[khoảng thời gian]`. Log line `[event]` có `correlation_id=[...]` đại diện cho request bị ảnh hưởng. Trace cùng `correlation_id` cho thấy span `[retrieval/generation/prompt/tool]` có dấu hiệu `[chậm/lỗi/token tăng]`. Root cause là `[nguyên nhân suy ra từ evidence]`. Fix action là `[hành động khôi phục]`; preventive measure là `[alert/runbook/test/guardrail để ngăn tái diễn]`."
+Chuỗi evidence:
+
+```text
+P95 ≈ 3.5s > 2s
+→ response_sent, correlation_id=req-8343780c, latency_ms=3696
+→ trace beb9b781881a9943cb33ebb10abfa5de
+→ retrieval span=2.50s
+→ root cause=rag_slow
+```
 
 ## 8. Giải thích và tự đánh giá
 
-- **Một quyết định kỹ thuật quan trọng và lý do:**
-- **Một lỗi/blocker đã gặp:**
-- **Cách tìm nguyên nhân và xử lý:**
-- **Cách hiểu luồng Metrics → Logs → Traces:**
-- **Vai trò của prompt version, token/cost, SLO hoặc rollback trong vận hành LLM:**
-- **Điều quan trọng nhất đã học:**
-- **Hạn chế hoặc phần chưa hoàn thành, nếu có:**
+- **Quyết định kỹ thuật quan trọng:** Scrub PII trước cả log serialization và trace export, thay vì chỉ che ở giao diện. Cách này ngăn dữ liệu nhạy cảm rời khỏi process qua hai kênh telemetry.
+- **Lỗi/blocker đã gặp:** App từng dùng `local-fallback` dù Langfuse authentication thành công.
+- **Cách tìm nguyên nhân và xử lý:** Kiểm tra `auth_check()` thành công nhưng `get_prompt(..., label="production")` trả 404. Fetch theo version cho thấy prompt tồn tại nhưng thiếu label `production`; gắn lại labels đúng cho v1 rồi chạy request mới và flush trace.
+- **Luồng Metrics → Logs → Traces:** Metrics phát hiện thời điểm P95 tăng; log tại cùng thời điểm cung cấp request đại diện và `correlation_id`; trace dùng cùng ID phân rã thời gian theo root/retrieval/generation để xác định bottleneck.
+- **Vai trò vận hành LLM:** Prompt version và labels hỗ trợ thử candidate, promote và rollback không sửa code. Token/cost giúp phát hiện model usage bất thường. SLO/error budget định nghĩa mức chấp nhận được; alert và runbook chuyển tín hiệu thành hành động điều tra.
+- **Điều quan trọng nhất đã học:** Một metric chỉ báo có sự cố; correlation ID và distributed trace mới cho biết request nào bị ảnh hưởng và span nào là nguyên nhân.
+- **Hạn chế còn lại:** Evidence 08 hiện gộp metadata root trong một ảnh thay vì tách 08a/08b; evidence 10 chỉ giữ ảnh trạng thái rollback thay vì cả ảnh promote và rollback; dashboard được chia thành 11a–11e. Cần đối chiếu mức chấp nhận theo yêu cầu CP4 cuối cùng. Commit SHA chỉ điền sau commit cuối đã push.
 
 ## 9. Checklist trước khi nộp
 
 - [ ] Kết quả và evidence thuộc commit SHA cuối.
 - [ ] Tất cả ảnh/output mở được bằng đường dẫn tương đối.
-- [ ] Có đúng 3 file text và 5 ảnh runtime theo hướng dẫn.
-- [ ] Incident evidence nối đúng metric → log → trace.
+- [x] Có 3 file text và evidence runtime 01–14 theo yêu cầu CP4.
+- [x] Incident evidence nối đúng metric → log → trace.
 - [ ] Trace/prompt evidence thuộc project Langfuse cá nhân và ảnh không lộ key/secret.
-- [ ] Repository chạy lại được theo README.
-- [ ] Không có secret, API key, PII thô hoặc evidence của người khác/lớp khác.
+- [ ] Repository chạy lại được theo README trên commit cuối.
+- [x] Ba output text đã được tạo từ lần chạy mới nhất.
+- [x] Không dùng evidence của học viên hoặc lớp khác.
+- [ ] Không có secret, API key hoặc PII thô trong commit cuối.
 - [ ] URL repo và commit SHA cuối đã được nộp trên LMS/Codelabs.
